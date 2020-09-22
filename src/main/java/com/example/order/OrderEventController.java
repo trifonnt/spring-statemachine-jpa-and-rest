@@ -15,19 +15,19 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.example.ContextEntity;
 import com.example.DefaultStateMachineAdapter;
 
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-
 @RepositoryRestController
-@RequiredArgsConstructor
 public class OrderEventController {
 
     final DefaultStateMachineAdapter<OrderState, OrderEvent, ContextEntity<OrderState, OrderEvent, ? extends Serializable>> orderStateMachineAdapter;
 
-    @RequestMapping(path = "/orders/{id}/receive/{event}", method = RequestMethod.POST)
-    @SneakyThrows
+    public OrderEventController(DefaultStateMachineAdapter<OrderState, OrderEvent, ContextEntity<OrderState, OrderEvent, ? extends Serializable>> orderStateMachineAdapter) {
+		super();
+		this.orderStateMachineAdapter = orderStateMachineAdapter;
+	}
+
+	@RequestMapping(path = "/orders/{id}/receive/{event}", method = RequestMethod.POST)
     @Transactional
-    public HttpEntity<Void> receiveEvent(@PathVariable("id") Order order, @PathVariable("event") OrderEvent event) {
+    public HttpEntity<Void> receiveEvent(@PathVariable("id") Order order, @PathVariable("event") OrderEvent event) throws Exception {
         StateMachine<OrderState, OrderEvent> stateMachine = orderStateMachineAdapter.restore(order);
         if (stateMachine.sendEvent(event)) {
             orderStateMachineAdapter.persist(stateMachine, order);

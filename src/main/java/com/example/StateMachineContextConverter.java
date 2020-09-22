@@ -17,10 +17,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import lombok.RequiredArgsConstructor;
 
 @SuppressWarnings("rawtypes")
-@RequiredArgsConstructor
 @Converter(autoApply = true)
 public class StateMachineContextConverter implements AttributeConverter<StateMachineContext, byte[]> {
 

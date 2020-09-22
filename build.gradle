@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.3.4.RELEASE")
     }
 }
 
@@ -35,11 +35,16 @@ ext {
 }
 
 dependencies {
+//    compile('org.javassist:javassist:3.23.1-GA') {force = true} //@Trifon
+    compile('javax.validation:validation-api:2.0.1.Final') //@Trifon
+    compile('org.springframework.hateoas:spring-hateoas:1.1.2.RELEASE') //@Trifon
+    
     compile('org.springframework.boot:spring-boot-starter')
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile('org.springframework.boot:spring-boot-starter-web')
     compile("org.springframework.boot:spring-boot-starter-data-rest")
-    runtime('org.springframework.data:spring-data-rest-hal-browser')
+//    runtime('org.springframework.data:spring-data-rest-hal-browser') //@Trifon - deprecated!
+    runtime('org.springframework.data:spring-data-rest-hal-explorer') //@Trifon
     runtime("com.h2database:h2")
     runtime('org.springframework.boot:spring-boot-starter-logging')
 
@@ -48,15 +53,20 @@ dependencies {
     testCompile 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
     testCompile 'junit:junit'
-    '2.0.2.RELEASE'.with { springStatemachineVersion ->
+    '2.2.0.RELEASE'.with { springStatemachineVersion ->
         compile("org.springframework.statemachine:spring-statemachine-core:$springStatemachineVersion")
         compile("org.springframework.statemachine:spring-statemachine-kryo:$springStatemachineVersion")
         testCompile("org.springframework.statemachine:spring-statemachine-test:$springStatemachineVersion")
     }
-    '1.18.2'.with { lombokVersion ->
-        compileOnly("org.projectlombok:lombok:$lombokVersion")
-        testCompileOnly("org.projectlombok:lombok:$lombokVersion")
-    }
+    //@Trifon - add JAX-B dependencies for JDK 9+
+    implementation "jakarta.xml.bind:jakarta.xml.bind-api:2.3.2"
+    implementation "org.glassfish.jaxb:jaxb-runtime:2.3.2"
+
+    //@Trifon
+//    '1.18.2'.with { lombokVersion ->
+//        compileOnly("org.projectlombok:lombok:$lombokVersion")
+//        testCompileOnly("org.projectlombok:lombok:$lombokVersion")
+//    }
 }
 
 compileJava.options.encoding = 'UTF-8'

@@ -23,7 +23,6 @@ import com.example.order.OrderEvent;
 import com.example.order.OrderRepository;
 import com.example.order.OrderState;
 
-import lombok.SneakyThrows;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -43,9 +42,8 @@ public class OrderStateMachineIntegrationTest {
     StateMachineFactory<OrderState, OrderEvent> orderStateFactory;
 
     @Test
-    @SneakyThrows
     @Transactional
-    public void should_persist() {
+    public void should_persist() throws Exception {
         // given
         Order o = new Order();
         o = repo.saveAndFlush(o);
@@ -60,11 +58,12 @@ public class OrderStateMachineIntegrationTest {
 
         // then the state is set on the order.
         o = repo.getOne(o.getId());
+        assertThat(o.getId()).isNotNull();
+        assertThat(o.getId()).isEqualTo(1L);
         assertThat(o.getStateMachineContext()).isNotNull();
         assertThat(o.getCurrentState()).isEqualTo(OrderState.ReadyForDelivery);
 
-        // and the statemachinecontext can be used to restore a new state
-        // machine.
+        // and the state machine context can be used to restore a new state machine.
         StateMachine<OrderState, OrderEvent> orderStateMachineNew = orderStateFactory.getStateMachine();
         persister.restore(orderStateMachineNew, o);
         assertThat(orderStateMachineNew.getState().getId()).isEqualTo(OrderState.ReadyForDelivery);

@@ -1,6 +1,10 @@
 package com.example;
 
+import java.util.UUID;
+
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.config.StateMachineFactory;
@@ -12,38 +16,37 @@ import com.example.order.OrderEvent;
 import com.example.order.OrderState;
 import com.example.order.OrderStateMachineConfiguration;
 
-import lombok.SneakyThrows;
-
 public class OrderStateMachineTest extends AbstractStateMachineTests {
 
-    StateMachineFactory<OrderState, OrderEvent> orderStateMachineFactory;
+	StateMachineFactory<OrderState, OrderEvent> orderStateMachineFactory;
 
-    @SuppressWarnings("unchecked")
-    @Override
-    protected AnnotationConfigApplicationContext buildContext() {
-        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(OrderStateMachineConfiguration.class);
-        orderStateMachineFactory = ctx.getBean(StateMachineFactory.class);
-        return ctx;
-    }
+	@SuppressWarnings("unchecked")
+	@Override
+	protected AnnotationConfigApplicationContext buildContext() {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(OrderStateMachineConfiguration.class);
+		orderStateMachineFactory = ctx.getBean(StateMachineFactory.class);
+		return ctx;
+	}
 
-    @Test
-    @SneakyThrows
-    public void testPrepaymentFlow() {
-        StateMachine<OrderState, OrderEvent> orderStateMachine = orderStateMachineFactory.getStateMachine();
-        StateMachineTestPlan<OrderState, OrderEvent> plan =
-                StateMachineTestPlanBuilder.<OrderState, OrderEvent>builder()
-                    .stateMachine(orderStateMachine)
-                    .step()
-                        .expectState(OrderState.Open)
-                        .expectVariable("paid", Boolean.FALSE)
-                        .and()
-                    .step()
-                        .sendEvent(OrderEvent.ReceivePayment)
-                        .expectState(OrderState.ReadyForDelivery)
-                        .expectExtendedStateChanged(1)
-                        .expectVariable("paid", Boolean.TRUE)
-                        .and()
-                    .step()
+	@Test
+	public void testPrepaymentFlow() throws Exception {
+		StateMachine<OrderState, OrderEvent> orderStateMachine = orderStateMachineFactory.getStateMachine();
+//		StateMachine<OrderState, OrderEvent> orderStateMachine = orderStateMachineFactory.getStateMachine(UUID.randomUUID()); //@Trifon
+
+		StateMachineTestPlan<OrderState, OrderEvent> plan =
+			StateMachineTestPlanBuilder.<OrderState, OrderEvent>builder()
+				.stateMachine(orderStateMachine)
+					.step()
+						.expectState(OrderState.Open)
+						.expectVariable("paid", Boolean.FALSE)
+						.and()
+					.step()
+						.sendEvent(OrderEvent.ReceivePayment)
+						.expectState(OrderState.ReadyForDelivery)
+						.expectExtendedStateChanged(1)
+						.expectVariable("paid", Boolean.TRUE)
+						.and()
+					.step()
                         .sendEvent(OrderEvent.Deliver)
                         .expectState(OrderState.Completed)
                         .and()
@@ -74,12 +77,10 @@ public class OrderStateMachineTest extends AbstractStateMachineTests {
                     .build();
 
         plan.test();
-
     }
 
     @Test
-    @SneakyThrows
-    public void testPostpaymentFlow() {
+    public void testPostpaymentFlow() throws Exception {
         StateMachine<OrderState, OrderEvent> orderStateMachine = orderStateMachineFactory.getStateMachine();
         StateMachineTestPlan<OrderState, OrderEvent> plan =
                 StateMachineTestPlanBuilder.<OrderState, OrderEvent>builder()

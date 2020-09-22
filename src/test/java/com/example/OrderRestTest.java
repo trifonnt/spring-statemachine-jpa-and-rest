@@ -38,8 +38,6 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 
-import lombok.SneakyThrows;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(
     classes = { OrderApplication.class },
@@ -86,8 +84,7 @@ public class OrderRestTest {
     }
 
     @Test
-    @SneakyThrows
-    public void should_trigger_state_transitions_via_links() {
+    public void should_trigger_state_transitions_via_links() throws Exception {
         given(this.documentationSpec)
         .accept("application/hal+json")
         .filter(document("order-get",
@@ -182,7 +179,7 @@ public class OrderRestTest {
 
     private void postToLink(Link eventLink, Matcher<Integer> statusCodeMatcher) {
         given(this.documentationSpec)
-                .filter(document(eventLink.getRel()))
+                .filter(document(eventLink.getRel().value()))
                 .accept("application/hal+json")
                 .contentType("application/json")
         .when()
